@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 function App() {
-
     const [students, setStudents] = useState([]);
 
     const [form, setForm] = useState({
@@ -15,16 +14,17 @@ function App() {
 
     const [editId, setEditId] = useState(null);
 
-    // Get students
+    // Your deployed backend
+    const API_URL =
+        "https://student-information-system-6e7t.onrender.com/api/students";
+
+    // Get all students
     const getStudents = async () => {
         try {
-            const response = await axios.get(
-                "http://localhost:5000/api/students"
-            );
-
+            const response = await axios.get(API_URL);
             setStudents(response.data);
         } catch (error) {
-            console.log(error);
+            console.log("Error getting students:", error);
         }
     };
 
@@ -34,26 +34,23 @@ function App() {
 
         try {
             if (editId) {
-
+                // Update
                 await axios.put(
-                    `http://localhost:5000/api/students/${editId}`,
+                    `${API_URL}/${editId}`,
                     form
                 );
 
                 alert("Student updated successfully");
 
                 setEditId(null);
-
             } else {
-
-                await axios.post(
-                    "http://localhost:5000/api/students",
-                    form
-                );
+                // Add
+                await axios.post(API_URL, form);
 
                 alert("Student added successfully");
             }
 
+            // Clear form
             setForm({
                 name: "",
                 rollNumber: "",
@@ -62,17 +59,17 @@ function App() {
                 semester: ""
             });
 
+            // Refresh list
             getStudents();
 
         } catch (error) {
-            console.log(error);
+            console.log("Error:", error);
             alert("Something went wrong");
         }
     };
 
     // Delete student
     const deleteStudent = async (id) => {
-
         const confirmDelete = window.confirm(
             "Are you sure you want to delete this student?"
         );
@@ -80,23 +77,20 @@ function App() {
         if (!confirmDelete) return;
 
         try {
-
-            await axios.delete(
-                `http://localhost:5000/api/students/${id}`
-            );
+            await axios.delete(`${API_URL}/${id}`);
 
             alert("Student deleted successfully");
 
             getStudents();
 
         } catch (error) {
-            console.log(error);
+            console.log("Error deleting student:", error);
+            alert("Could not delete student");
         }
     };
 
     // Edit student
     const editStudent = (student) => {
-
         setForm({
             name: student.name,
             rollNumber: student.rollNumber,
@@ -106,11 +100,16 @@ function App() {
         });
 
         setEditId(student._id);
+
+        // Scroll to form
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     };
 
     // Cancel edit
     const cancelEdit = () => {
-
         setEditId(null);
 
         setForm({
@@ -122,6 +121,7 @@ function App() {
         });
     };
 
+    // Load students when page opens
     useEffect(() => {
         getStudents();
     }, []);
@@ -146,8 +146,7 @@ function App() {
 
             <main className="max-w-6xl mx-auto px-6 py-8">
 
-                {/* Form */}
-
+                {/* Add / Edit Form */}
                 <div className="bg-white rounded-xl shadow-md p-6 mb-8">
 
                     <h2 className="text-xl font-semibold text-gray-800 mb-5">
@@ -159,6 +158,7 @@ function App() {
                         className="grid grid-cols-1 md:grid-cols-2 gap-4"
                     >
 
+                        {/* Name */}
                         <input
                             type="text"
                             placeholder="Student Name"
@@ -170,8 +170,10 @@ function App() {
                                 })
                             }
                             className="border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
 
+                        {/* Roll Number */}
                         <input
                             type="text"
                             placeholder="Roll Number"
@@ -183,8 +185,10 @@ function App() {
                                 })
                             }
                             className="border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
 
+                        {/* Email */}
                         <input
                             type="email"
                             placeholder="Email"
@@ -196,8 +200,10 @@ function App() {
                                 })
                             }
                             className="border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
 
+                        {/* Department */}
                         <input
                             type="text"
                             placeholder="Department"
@@ -209,8 +215,10 @@ function App() {
                                 })
                             }
                             className="border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
 
+                        {/* Semester */}
                         <input
                             type="number"
                             placeholder="Semester"
@@ -222,8 +230,10 @@ function App() {
                                 })
                             }
                             className="border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
 
+                        {/* Buttons */}
                         <div className="flex gap-3 items-center">
 
                             <button
@@ -248,11 +258,9 @@ function App() {
                         </div>
 
                     </form>
-
                 </div>
 
-                {/* Students */}
-
+                {/* Students Table */}
                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
 
                     <div className="px-6 py-5 border-b">
